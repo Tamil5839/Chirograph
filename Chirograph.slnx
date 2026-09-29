@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Chirograph.Application/Chirograph.Application.csproj" />
+    <Project Path="src/Chirograph.Domain/Chirograph.Domain.csproj" />
+    <Project Path="src/Chirograph.Infrastructure/Chirograph.Infrastructure.csproj" />
+    <Project Path="src/Chirograph.Web/Chirograph.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Chirograph.IntegrationTests/Chirograph.IntegrationTests.csproj" />
+    <Project Path="tests/Chirograph.UnitTests/Chirograph.UnitTests.csproj" />
+  </Folder>
+</Solution>

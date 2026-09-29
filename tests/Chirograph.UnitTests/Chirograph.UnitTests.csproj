@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Chirograph.Domain\Chirograph.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Chirograph.Application\Chirograph.Application.csproj" />
+    <ProjectReference Include="..\..\src\Chirograph.Infrastructure\Chirograph.Infrastructure.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="xunit.v3" />
+    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
+    <PackageReference Include="PdfPig" />
+    <PackageReference Include="Docnet.Core" />
+    <PackageReference Include="ZXing.Net" />
+  </ItemGroup>
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+</Project>

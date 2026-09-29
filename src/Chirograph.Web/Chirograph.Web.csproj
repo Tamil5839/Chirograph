@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <UserSecretsId>chirograph-web-8c1f5a2e-3b7d-4f0e-9a61-2d4c8e7b9f13</UserSecretsId>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Chirograph.Application\Chirograph.Application.csproj" />
+    <ProjectReference Include="..\Chirograph.Infrastructure\Chirograph.Infrastructure.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Chirograph.IntegrationTests" />
+  </ItemGroup>
+</Project>

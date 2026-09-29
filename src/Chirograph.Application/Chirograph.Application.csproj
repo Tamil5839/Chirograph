@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\Chirograph.Domain\Chirograph.Domain.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- EF Core (provider-agnostic) is used only for the DbSet-based IAppDbContext port. -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
+    <PackageReference Include="Microsoft.Extensions.Options" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Chirograph.UnitTests" />
+  </ItemGroup>
+</Project>
