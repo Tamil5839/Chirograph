@@ -12,6 +12,10 @@
     <PackageReference Include="MailKit" />
   </ItemGroup>
   <ItemGroup>
+    <!-- Liberation Sans (SIL OFL 1.1, see Pdf/Fonts/OFL.txt) is embedded so stamping renders identically on every OS. -->
+    <EmbeddedResource Include="Pdf\Fonts\*.ttf" LogicalName="Chirograph.Fonts.%(Filename)%(Extension)" />
+  </ItemGroup>
+  <ItemGroup>
     <InternalsVisibleTo Include="Chirograph.UnitTests" />
   </ItemGroup>
 </Project>
