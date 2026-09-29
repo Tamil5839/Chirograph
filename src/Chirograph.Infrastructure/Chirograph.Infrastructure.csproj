@@ -10,6 +10,8 @@
     <PackageReference Include="QRCoder" />
     <PackageReference Include="DnsClient" />
     <PackageReference Include="MailKit" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
   </ItemGroup>
   <ItemGroup>
     <!-- Liberation Sans (SIL OFL 1.1, see Pdf/Fonts/OFL.txt) is embedded so stamping renders identically on every OS. -->
