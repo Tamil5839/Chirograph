@@ -1,0 +1,51 @@
+@page "/signup"
+@model SignUpModel
+@{
+    ViewData["Title"] = "Register your company";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <h1 class="h3 mb-2">Register your company</h1>
+        @if (Model.SentTo is not null)
+        {
+            <div class="alert alert-success" role="status">
+                <h2 class="h5">Check your inbox</h2>
+                <p class="mb-0">We sent a confirmation link to <strong>@Model.SentTo</strong>. Open it to continue: next
+                    you'll prove that your organization controls its domain.</p>
+            </div>
+        }
+        else
+        {
+            <p class="text-muted">
+                Verifiers see your <strong>domain</strong> next to every letter you issue, so the first step is to prove your
+                organization controls it. Until then you can't issue documents.
+            </p>
+            <form method="post" id="signup-form" class="card card-body mt-3">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                <div class="mb-3">
+                    <label asp-for="Input.OrganizationName" class="form-label"></label>
+                    <input asp-for="Input.OrganizationName" class="form-control" autocomplete="organization" />
+                    <span asp-validation-for="Input.OrganizationName" class="text-danger small"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Input.Domain" class="form-label"></label>
+                    <input asp-for="Input.Domain" class="form-control" placeholder="acme.com" autocomplete="off" spellcheck="false" />
+                    <div class="form-text">The domain your company's email addresses use.</div>
+                    <span asp-validation-for="Input.Domain" class="text-danger small"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Input.Email" class="form-label"></label>
+                    <input asp-for="Input.Email" class="form-control" placeholder="you@acme.com" autocomplete="email" />
+                    <div class="form-text">Must be on the domain above. You'll become the first admin.</div>
+                    <span asp-validation-for="Input.Email" class="text-danger small"></span>
+                </div>
+                <button type="submit" class="btn btn-primary">Continue</button>
+            </form>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

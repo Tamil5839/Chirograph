@@ -1,0 +1,27 @@
+@page "/v"
+@model IndexModel
+@{
+    ViewData["Title"] = "Verify a document";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <h1 class="h3 mb-2">Verify a document</h1>
+        <p class="text-muted">Scan the QR code at the bottom of the letter with your phone's camera, or enter the verification
+            ID printed next to it.</p>
+        <form method="get" id="lookup-form" class="card card-body">
+            <label asp-for="Id" class="form-label fw-semibold">Verification ID</label>
+            <div class="input-group input-group-lg">
+                <input asp-for="Id" class="form-control id-input @(Model.Invalid ? "is-invalid" : "")" placeholder="XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+                       autocomplete="off" spellcheck="false" aria-describedby="id-help" />
+                <button type="submit" class="btn btn-primary">Verify</button>
+            </div>
+            @if (Model.Invalid)
+            {
+                <div class="text-danger small mt-2" role="alert">That isn't a valid verification ID. IDs have 25 letters and digits,
+                    usually written in five groups of five. Check for typos.</div>
+            }
+            <div id="id-help" class="form-text">Letters and digits only; hyphens, spaces and upper/lower case don't matter.</div>
+        </form>
+    </div>
+</div>

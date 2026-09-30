@@ -1,0 +1,45 @@
+@page "/dev/mailbox/{id?}"
+@model MailboxModel
+@{
+    ViewData["Title"] = "Development mailbox";
+}
+
+<div class="alert alert-info small">Development only. Emails are written to <code>@Model.OutboxDirectory</code> instead of
+    being sent, so the whole flow works without a mail server.</div>
+
+<div class="row g-4">
+    <div class="col-lg-5">
+        <div class="list-group">
+            @if (Model.Messages.Count == 0)
+            {
+                <div class="list-group-item text-muted">No emails yet.</div>
+            }
+            @foreach (var message in Model.Messages)
+            {
+                <a class="list-group-item list-group-item-action @(message.Id == Model.Selected?.Summary.Id ? "active" : "")"
+                   asp-page="/Dev/Mailbox" asp-route-id="@message.Id">
+                    <div class="fw-semibold text-truncate">@message.Subject</div>
+                    <div class="small">To @message.To · @Display.DateTime(message.Date)@(message.AttachmentCount > 0 ? " · 📎" : "")</div>
+                </a>
+            }
+        </div>
+    </div>
+    <div class="col-lg-7">
+        @if (Model.Selected is { } selected)
+        {
+            <h1 class="h5">@selected.Summary.Subject</h1>
+            <p class="small text-muted">To @selected.Summary.To · @Display.DateTime(selected.Summary.Date)</p>
+            <div class="mail-body mb-3">@Display.Linkify(selected.TextBody)</div>
+            @for (var i = 0; i < selected.Attachments.Count; i++)
+            {
+                <a class="btn btn-sm btn-outline-secondary me-2" asp-page-handler="Attachment" asp-route-id="@selected.Summary.Id" asp-route-index="@i">
+                    Download @selected.Attachments[i].FileName
+                </a>
+            }
+        }
+        else
+        {
+            <p class="text-muted">Choose an email.</p>
+        }
+    </div>
+</div>

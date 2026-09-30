@@ -1,0 +1,90 @@
+@page "/org/domain"
+@model DomainModel
+@{
+    ViewData["Title"] = "Domain verification";
+    var status = Model.Status;
+}
+
+<div class="col-lg-9">
+    <h1 class="h3 mb-3">Domain verification</h1>
+
+    @if (TempData["Message"] is string message)
+    {
+        <div class="alert alert-success" role="status">@message</div>
+    }
+    @if (Model.ErrorMessage is not null)
+    {
+        <div class="alert alert-danger" role="alert">@Model.ErrorMessage</div>
+    }
+
+    @if (status.IsVerified)
+    {
+        <div class="card card-body">
+            <p class="mb-1"><span class="domain-badge">@status.Domain</span> <span class="badge text-bg-success ms-2">Verified</span></p>
+            <p class="text-muted mb-0">Verified on @Display.Date(status.VerifiedAt!.Value) by @Display.VerificationMethod(status.Method)
+                (@status.Evidence). Verifiers see this domain next to every document @status.OrganizationName issues.</p>
+        </div>
+    }
+    else
+    {
+        <p class="text-muted">
+            Prove that <strong>@status.OrganizationName</strong> controls <span class="domain-badge">@status.Domain</span>. Use
+            whichever of these two methods is easier for your IT team. Until then, nobody in your organization can issue
+            documents.
+        </p>
+        @if (!User.IsOrganizationAdmin())
+        {
+            <div class="alert alert-info">Only an admin of your organization can verify the domain.</div>
+        }
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <h2 class="card-title">Option 1 · Add a DNS TXT record</h2>
+                <p class="text-muted">Ask whoever manages your DNS to add this record, then check it here.</p>
+                <dl class="detail-list">
+                    <dt>Type</dt><dd><code>TXT</code></dd>
+                    <dt>Host / name</dt>
+                    <dd class="copy-row"><code>@status.DnsRecordName</code>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-copy="@status.DnsRecordName">Copy</button></dd>
+                    <dt>Value</dt>
+                    <dd class="copy-row"><code id="dns-value">@status.DnsRecordValue</code>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-copy="@status.DnsRecordValue">Copy</button></dd>
+                </dl>
+                <p class="small text-muted">Publishing the same value on @status.Domain itself also works. New records usually appear
+                    within minutes.</p>
+                @if (User.IsOrganizationAdmin())
+                {
+                    <form method="post" asp-page-handler="CheckDns" id="check-dns-form">
+                        <button type="submit" class="btn btn-primary">Check DNS now</button>
+                    </form>
+                }
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title">Option 2 · Confirm from an administrative mailbox</h2>
+                <p class="text-muted">We email a link to one of the domain's administrative addresses. Whoever reads that
+                    mailbox confirms the request. An ordinary employee mailbox isn't enough, because anyone with an address on
+                    the domain could otherwise register your company.</p>
+                @if (User.IsOrganizationAdmin())
+                {
+                    <form method="post" asp-page-handler="SendEmail" id="send-email-form" class="row g-2 align-items-end">
+                        <div class="col-sm-8">
+                            <label for="Mailbox" class="form-label">Send the confirmation to</label>
+                            <select asp-for="Mailbox" class="form-select">
+                                @foreach (var mailbox in status.AdminMailboxes)
+                                {
+                                    <option value="@mailbox.LocalPart">@mailbox</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-sm-4">
+                            <button type="submit" class="btn btn-outline-primary w-100">Send confirmation email</button>
+                        </div>
+                    </form>
+                }
+            </div>
+        </div>
+    }
+</div>

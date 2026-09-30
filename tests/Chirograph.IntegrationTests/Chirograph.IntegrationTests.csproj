@@ -9,6 +9,13 @@
     <PackageReference Include="xunit.v3" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
     <PackageReference Include="AngleSharp" />
+    <PackageReference Include="Docnet.Core" />
+    <PackageReference Include="ZXing.Net" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Shared test doubles and the PDF rendering helper, compiled into both test projects. -->
+    <Compile Include="..\Chirograph.UnitTests\Support\Fakes.cs" Link="Support\Fakes.cs" />
+    <Compile Include="..\Chirograph.UnitTests\Support\PdfRendering.cs" Link="Support\PdfRendering.cs" />
   </ItemGroup>
   <ItemGroup>
     <Using Include="Xunit" />

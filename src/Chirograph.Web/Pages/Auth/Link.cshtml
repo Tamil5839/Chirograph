@@ -1,0 +1,61 @@
+@page "/auth/link"
+@using Chirograph.Domain.Access
+@model LinkModel
+@{
+    ViewData["Title"] = "Continue";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        @if (Model.ConfirmedDomain is { } domain)
+        {
+            <div class="alert alert-success" role="status">
+                <h1 class="h4">Domain confirmed</h1>
+                <p class="mb-0"><strong>@domain.OrganizationName</strong> is now verified for
+                    <span class="domain-badge">@domain.Domain</span>. Its members can issue documents. You can close this page.</p>
+            </div>
+        }
+        else if (Model.ErrorMessage is not null)
+        {
+            <div class="alert alert-warning" role="alert">
+                <h1 class="h4">This link can't be used</h1>
+                <p>@Model.ErrorMessage</p>
+                <p class="mb-0 small">HR members can <a asp-page="/Auth/SignIn">request a new sign-in link</a>; employees can
+                    <a asp-page="/Me/Index">request one here</a>.</p>
+            </div>
+        }
+        else if (Model.Preview is { } preview)
+        {
+            <div class="card card-body">
+                @switch (preview.Purpose)
+                {
+                    case MagicLinkPurpose.StaffSignIn:
+                    case MagicLinkPurpose.StaffInvite:
+                        <h1 class="h4">Sign in to @preview.OrganizationName</h1>
+                        <p class="text-muted">You'll be signed in as <strong>@preview.Email</strong>
+                            (@preview.OrganizationDomain).</p>
+                        break;
+                    case MagicLinkPurpose.DomainVerification:
+                        <h1 class="h4">Confirm @preview.OrganizationDomain for @preview.OrganizationName</h1>
+                        <p><strong>@preview.RequestedBy</strong> asked to register <span class="domain-badge">@preview.OrganizationDomain</span>
+                            for the organization <strong>@preview.OrganizationName</strong>.</p>
+                        <p class="text-muted">Once confirmed, letters issued by this organization will be shown to verifiers
+                            as coming from @preview.OrganizationDomain. Only continue if you are responsible for this domain
+                            and recognise the request.</p>
+                        break;
+                    case MagicLinkPurpose.EmployeeSignIn:
+                        <h1 class="h4">See your documents</h1>
+                        <p class="text-muted">You'll be signed in as <strong>@preview.Email</strong> to see the letters issued
+                            to you and who has verified them.</p>
+                        break;
+                }
+                <form method="post" id="link-form">
+                    <input type="hidden" asp-for="Token" />
+                    <button type="submit" class="btn btn-primary">
+                        @(preview.Purpose == MagicLinkPurpose.DomainVerification ? "Confirm domain" : "Continue")
+                    </button>
+                </form>
+            </div>
+        }
+    </div>
+</div>

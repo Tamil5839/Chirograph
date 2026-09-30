@@ -1,0 +1,68 @@
+@page "/org/team"
+@model TeamModel
+@{
+    ViewData["Title"] = "Team";
+}
+
+<div class="col-lg-9">
+    <h1 class="h3 mb-3">Team</h1>
+    @if (TempData["Message"] is string message)
+    {
+        <div class="alert alert-success" role="status">@message</div>
+    }
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h2 class="card-title">Invite a teammate</h2>
+            <p class="text-muted small">Invitations can only go to addresses on @User.FindFirst(ChirographClaims.OrganizationDomain)?.Value.
+                Admins also manage the domain and the team; issuers issue and revoke documents.</p>
+            <form method="post" asp-page-handler="Invite" id="invite-form" class="row g-2 align-items-end">
+                <div class="col-md-6">
+                    <label asp-for="Invite.Email" class="form-label"></label>
+                    <input asp-for="Invite.Email" class="form-control" autocomplete="off" />
+                    <span asp-validation-for="Invite.Email" class="text-danger small"></span>
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="Invite.Role" class="form-label"></label>
+                    <select asp-for="Invite.Role" class="form-select">
+                        <option value="@MemberRole.Issuer">Issuer</option>
+                        <option value="@MemberRole.Admin">Admin</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary w-100">Send invitation</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <h2 class="card-title">Members</h2>
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead><tr><th>Email</th><th>Role</th><th>Status</th><th></th></tr></thead>
+                    <tbody>
+                    @foreach (var member in Model.Members)
+                    {
+                        <tr>
+                            <td>@member.Email @if (member.IsYou) { <span class="badge text-bg-light">you</span> }</td>
+                            <td>@Display.Role(member.Role)</td>
+                            <td>@(member.Status == MemberStatus.Active ? $"Active since {Display.Date(member.ActivatedAt!.Value)}" : "Invitation sent")</td>
+                            <td class="text-end">
+                                @if (!member.IsYou)
+                                {
+                                    <form method="post" asp-page-handler="Remove" asp-route-memberId="@member.Id">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,36 @@
+@page "/auth/signin"
+@model SignInModel
+@{
+    ViewData["Title"] = "HR sign in";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-5">
+        <h1 class="h3 mb-3">Sign in</h1>
+        @if (Model.Sent)
+        {
+            <div class="alert alert-success" role="status">
+                If <strong>@Model.Email</strong> belongs to a Chirograph member, a sign-in link is on its way. It works once
+                and expires in 20 minutes.
+            </div>
+        }
+        else
+        {
+            <p class="text-muted">Chirograph doesn't use passwords. Enter your work email and we'll send you a sign-in link.</p>
+            <form method="post" id="signin-form" class="card card-body">
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label"></label>
+                    <input asp-for="Email" class="form-control" autocomplete="email" autofocus />
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+                <button type="submit" class="btn btn-primary">Email me a sign-in link</button>
+            </form>
+            <p class="small text-muted mt-3">New to Chirograph? <a asp-page="/SignUp">Register your company</a>.
+                Looking for your own letters? <a asp-page="/Me/Index">Go to My documents</a>.</p>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

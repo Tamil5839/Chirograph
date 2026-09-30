@@ -1,10 +1,50 @@
-﻿@page
+@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "Employment letters anyone can verify";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<section class="hero">
+    <h1 class="display-6">Employment letters anyone can verify in seconds</h1>
+    <p class="lead text-muted mt-3">
+        Companies issue experience and relieving letters through Chirograph. Every letter carries a QR code and a
+        verification ID. Scan it to see who issued it, from which verified domain, and whether it is still valid.
+        Upload the PDF you received to prove it has not been altered by even a single byte.
+    </p>
+    <form method="get" asp-page="/Verify/Index" class="mt-4">
+        <label for="verification-id" class="form-label fw-semibold">Have a letter? Enter its verification ID</label>
+        <div class="input-group input-group-lg">
+            <input id="verification-id" name="id" class="form-control id-input" placeholder="XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+                   autocomplete="off" spellcheck="false" required />
+            <button type="submit" class="btn btn-primary">Verify</button>
+        </div>
+        <div class="form-text">The ID is printed next to the QR code at the bottom of every page.</div>
+    </form>
+</section>
+
+<section class="row g-4 mt-2">
+    <div class="col-md-4">
+        <div class="card h-100"><div class="card-body">
+            <h2 class="card-title">For verifiers</h2>
+            <p class="card-text text-muted">Scan the QR code or type the ID. You see the issuer's verified domain, the
+                letter's key details and its status. Upload the file for an exact, byte-for-byte check.</p>
+            <a asp-page="/Verify/Index">Verify a document →</a>
+        </div></div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100"><div class="card-body">
+            <h2 class="card-title">For HR teams</h2>
+            <p class="card-text text-muted">Prove you own your company's domain, then issue letters that anyone can check.
+                Revoke a letter at any time.</p>
+            <a asp-page="/SignUp">Register your company →</a>
+        </div></div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100"><div class="card-body">
+            <h2 class="card-title">For employees</h2>
+            <p class="card-text text-muted">See every letter issued to you and exactly when each was checked, and by whom
+                if the verifier said so.</p>
+            <a asp-page="/Me/Index">My documents →</a>
+        </div></div>
+    </div>
+</section>

@@ -1,52 +1,80 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Chirograph.Web</title>
-    <script type="importmap"></script>
+    <title>@(ViewData["Title"] is string title ? $"{title} · Chirograph" : "Chirograph")</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/Chirograph.Web.styles.css" asp-append-version="true" />
 </head>
 <body>
+    <a class="visually-hidden-focusable" href="#main">Skip to content</a>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-md bg-white border-bottom">
             <div class="container">
-                <a class="navbar-brand" asp-area="" asp-page="/Index">Chirograph.Web</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+                <a class="navbar-brand brand" asp-page="/Index"><span class="brand-mark" aria-hidden="true">C</span> Chirograph</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#main-nav"
+                        aria-controls="main-nav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Privacy">Privacy</a>
-                        </li>
+                <div class="collapse navbar-collapse" id="main-nav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item"><a class="nav-link" asp-page="/Verify/Index">Verify a document</a></li>
+                        @if (User.IsStaff())
+                        {
+                            <li class="nav-item"><a class="nav-link" asp-page="/Org/Index">Dashboard</a></li>
+                            @if (User.OrganizationIsVerified())
+                            {
+                                <li class="nav-item"><a class="nav-link" asp-page="/Org/Documents/Issue">Issue</a></li>
+                            }
+                            <li class="nav-item"><a class="nav-link" asp-page="/Org/Domain">Domain</a></li>
+                            @if (User.IsOrganizationAdmin())
+                            {
+                                <li class="nav-item"><a class="nav-link" asp-page="/Org/Team">Team</a></li>
+                            }
+                        }
+                        else
+                        {
+                            <li class="nav-item"><a class="nav-link" asp-page="/Me/Index">My documents</a></li>
+                        }
+                    </ul>
+                    <ul class="navbar-nav align-items-md-center">
+                        @if (User.IsStaff() || User.IsEmployee())
+                        {
+                            <li class="nav-item navbar-text small text-muted me-md-2">
+                                @User.Identity?.Name@(User.IsStaff() ? $" · {User.FindFirst(ChirographClaims.OrganizationName)?.Value}" : "")
+                            </li>
+                            <li class="nav-item">
+                                <form method="post" asp-page="/Auth/SignOut">
+                                    <button type="submit" class="btn btn-link nav-link">Sign out</button>
+                                </form>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item"><a class="nav-link" asp-page="/Auth/SignIn">HR sign in</a></li>
+                            <li class="nav-item"><a class="btn btn-primary btn-sm ms-md-2" asp-page="/SignUp">Register your company</a></li>
+                        }
                     </ul>
                 </div>
             </div>
         </nav>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - Chirograph.Web - <a asp-area="" asp-page="/Privacy">Privacy</a>
+    <main id="main" class="container py-4">
+        @RenderBody()
+    </main>
+
+    <footer class="border-top py-3 small text-muted">
+        <div class="container d-flex flex-wrap justify-content-between gap-2">
+            <span>Chirograph · employment letters anyone can verify</span>
+            <a asp-page="/Privacy">Privacy &amp; your data</a>
         </div>
     </footer>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

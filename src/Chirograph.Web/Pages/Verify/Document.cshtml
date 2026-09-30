@@ -1,0 +1,149 @@
+@page "/v/{id}"
+@model DocumentModel
+@{
+    var result = Model.Result;
+    var document = result.Document;
+    var outcome = result.Outcome;
+    ViewData["Title"] = document is null ? "Document not found" : $"Verify {Display.Type(document.Type).ToLowerInvariant()}";
+}
+
+@switch (outcome.Verdict)
+{
+    case VerificationVerdict.NotFound:
+        <div class="verdict verdict-bad" role="alert" id="verdict" data-verdict="not-found">
+            <h1 class="h2"><span class="verdict-icon" aria-hidden="true">✕</span>No document found</h1>
+            <p>There is no Chirograph document with the ID <code>@Model.Id</code>. Check it for typos. If you copied it
+                from a letter and it still isn't found, the letter may not be genuine: contact the organization it claims to
+                be from.</p>
+        </div>
+        <a asp-page="/Verify/Index">Try another ID</a>
+        break;
+
+    case VerificationVerdict.Authentic:
+        <div class="verdict verdict-ok" role="status" id="verdict" data-verdict="authentic">
+            <h1 class="h2"><span class="verdict-icon" aria-hidden="true">✓</span>Genuine and unaltered</h1>
+            <p>The file you checked is exactly the document @document!.IssuerName issued, byte for byte, and it has not been revoked.</p>
+        </div>
+        break;
+
+    case VerificationVerdict.FileMismatch:
+        <div class="verdict verdict-bad" role="alert" id="verdict" data-verdict="file-mismatch">
+            <h1 class="h2"><span class="verdict-icon" aria-hidden="true">✕</span>This file does not match the issued document</h1>
+            <p>Do not rely on it. The file differs from what @document!.IssuerName issued: its content may have been changed,
+                or it was re-saved or converted, which also changes the file. Compare the details below with the letter you
+                have, or ask for the original PDF.</p>
+        </div>
+        break;
+
+    case VerificationVerdict.Revoked:
+        <div class="verdict verdict-bad" role="alert" id="verdict" data-verdict="revoked">
+            <h1 class="h2"><span class="verdict-icon" aria-hidden="true">✕</span>Revoked on @Display.Date(outcome.RevokedAt!.Value)</h1>
+            <p>@document!.IssuerName revoked this document on @Display.Date(outcome.RevokedAt!.Value). It should no longer be relied on.
+                @if (outcome.FileCheck == FileCheckResult.Match)
+                {
+                    <span>The file you checked is the one originally issued.</span>
+                }
+                else if (outcome.FileCheck == FileCheckResult.Mismatch)
+                {
+                    <span>The file you checked is also not the one that was issued.</span>
+                }
+            </p>
+        </div>
+        break;
+
+    default:
+        <div class="verdict verdict-info" role="status" id="verdict" data-verdict="record-valid">
+            <h1 class="h2"><span class="verdict-icon" aria-hidden="true">✓</span>Valid record from @document!.IssuerName</h1>
+            <p>The issuer's record for this ID exists and has not been revoked. To be sure the file you received hasn't been
+                altered, check it below: even a one-byte change will be detected.</p>
+        </div>
+        break;
+}
+
+@if (document is not null)
+{
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="card-title">Issued by</h2>
+                    <p class="fs-5 mb-1" id="issuer-name">@document.IssuerName</p>
+                    <p class="mb-2"><span class="domain-badge" id="issuer-domain">@document.IssuerDomain</span> <span class="badge text-bg-success ms-1">Verified domain</span></p>
+                    <p class="small text-muted mb-0">Chirograph confirmed that the issuer controls <strong>@document.IssuerDomain</strong>
+                        through @Display.VerificationMethod(document.IssuerVerificationMethod)@(document.IssuerVerifiedAt is { } verifiedAt ? $" on {Display.Date(verifiedAt)}" : "").
+                        The organization name is chosen by the issuer; the domain is what was proven. Make sure it is the domain you expect.</p>
+                    @if (document.IssuerDomain.IsInternationalized)
+                    {
+                        <div class="alert alert-warning small mt-3 mb-0">This domain contains international characters. It displays as
+                            <strong>@document.IssuerDomain.ToUnicode()</strong>, which may look like a familiar name but is a different domain.</div>
+                    }
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="card-title">Document</h2>
+                    <dl class="row detail-list mb-0">
+                        <dt class="col-sm-4">Type</dt><dd class="col-sm-8" id="document-type">@Display.Type(document.Type)</dd>
+                        <dt class="col-sm-4">Employee</dt><dd class="col-sm-8" id="employee-name">@document.EmployeeName</dd>
+                        <dt class="col-sm-4">Role</dt><dd class="col-sm-8" id="designation">@document.Designation</dd>
+                        <dt class="col-sm-4">Employment</dt><dd class="col-sm-8" id="employment">@Display.Period(document.EmploymentStart, document.EmploymentEnd)</dd>
+                        <dt class="col-sm-4">Issued</dt><dd class="col-sm-8">@Display.Date(document.IssuedAt)</dd>
+                        <dt class="col-sm-4">Status</dt>
+                        <dd class="col-sm-8" id="status">
+                            @if (document.Status == DocumentStatus.Revoked)
+                            {
+                                <span class="badge text-bg-danger status-pill">Revoked</span> <span>on @Display.Date(document.RevokedAt!.Value)</span>
+                            }
+                            else
+                            {
+                                <span class="badge text-bg-success status-pill">Valid</span>
+                            }
+                        </dd>
+                        <dt class="col-sm-4">Verification ID</dt><dd class="col-sm-8 font-monospace">@document.VerificationId.ToDisplayString()</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="card-title">Check the exact file</h2>
+                    <p class="small text-muted">Upload the PDF you received. It is compared, by its SHA-256 fingerprint, with the file
+                        that was issued. The file is checked in memory and never stored.</p>
+                    <form method="post" enctype="multipart/form-data" id="check-form">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger small" role="alert"></div>
+                        <div class="mb-3">
+                            <label asp-for="Upload" class="form-label"></label>
+                            <input asp-for="Upload" type="file" accept="application/pdf,.pdf" class="form-control" />
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="VerifierOrganization" class="form-label"></label>
+                            <input asp-for="VerifierOrganization" class="form-control" maxlength="200" autocomplete="organization" />
+                            <div class="form-text">Optional. Shown to the employee, so they know who checked their letter.</div>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Check file</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body small">
+                    <h2 class="card-title">Fingerprint of the issued file</h2>
+                    <p class="fingerprint mb-2" id="issued-fingerprint">@document.Fingerprint</p>
+                    @if (result.PresentedFingerprint is { } presented)
+                    {
+                        <p class="text-muted mb-1">Your file:</p>
+                        <p class="fingerprint mb-2" id="presented-fingerprint">@presented</p>
+                    }
+                    <p class="text-muted mb-0">You can compute it yourself: <code>sha256sum letter.pdf</code> (Linux/macOS) or
+                        <code>Get-FileHash letter.pdf</code> (Windows PowerShell).</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <p class="small text-muted mt-4">This page is shown only to people who have this document's link or QR code, and is hidden
+        from search engines. @document.EmployeeName can see when this document is checked.</p>
+}

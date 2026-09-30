@@ -1,0 +1,110 @@
+@page "/org"
+@model IndexModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+    <div>
+        <h1 class="h3 mb-1">@User.FindFirst(ChirographClaims.OrganizationName)?.Value</h1>
+        <span class="domain-badge">@User.FindFirst(ChirographClaims.OrganizationDomain)?.Value</span>
+        @if (User.OrganizationIsVerified())
+        {
+            <span class="badge text-bg-success ms-2">Domain verified</span>
+        }
+    </div>
+    @if (User.OrganizationIsVerified())
+    {
+        <a class="btn btn-primary" asp-page="/Org/Documents/Issue">Issue a document</a>
+    }
+</div>
+
+@if (!User.OrganizationIsVerified())
+{
+    <div class="alert alert-warning" role="alert">
+        <strong>Verify your domain to start issuing.</strong> Verifiers see your domain next to every letter, so we need
+        proof that your organization controls it. <a asp-page="/Org/Domain" class="alert-link">Verify now</a>.
+    </div>
+}
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                    <h2 class="card-title mb-0">Issued documents</h2>
+                    <form method="get" class="d-flex gap-2" role="search">
+                        <input asp-for="Q" class="form-control form-control-sm" placeholder="Employee name or ID" aria-label="Search documents" />
+                        <button type="submit" class="btn btn-sm btn-outline-secondary">Search</button>
+                    </form>
+                </div>
+                @if (Model.Documents.Count == 0)
+                {
+                    <p class="text-muted mb-0">@(string.IsNullOrWhiteSpace(Model.Q) ? "No documents issued yet." : "No documents match that search.")</p>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0">
+                            <thead><tr><th>Employee</th><th>Type</th><th>Issued</th><th>Status</th><th class="text-end">Checks</th></tr></thead>
+                            <tbody>
+                            @foreach (var document in Model.Documents)
+                            {
+                                <tr>
+                                    <td>
+                                        <a asp-page="/Org/Documents/Details" asp-route-id="@document.Id">@document.EmployeeName</a>
+                                        <div class="small text-muted">@document.Designation</div>
+                                    </td>
+                                    <td>@Display.Type(document.Type)</td>
+                                    <td>@Display.Date(document.IssuedAt)</td>
+                                    <td>
+                                        @if (document.Status == DocumentStatus.Revoked)
+                                        {
+                                            <span class="badge text-bg-danger status-pill">Revoked</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge text-bg-success status-pill">Valid</span>
+                                        }
+                                    </td>
+                                    <td class="text-end">@document.VerificationCount</td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title">Recent verifications</h2>
+                @if (Model.Recent.Count == 0)
+                {
+                    <p class="text-muted mb-0">No one has checked your documents yet.</p>
+                }
+                else
+                {
+                    <ul class="list-unstyled mb-0">
+                        @foreach (var item in Model.Recent)
+                        {
+                            <li class="mb-3">
+                                <a asp-page="/Org/Documents/Details" asp-route-id="@item.DocumentId">@item.EmployeeName</a>
+                                <div class="small text-muted">
+                                    @Display.DateTime(item.Entry.OccurredAt) ·
+                                    @(item.Entry.Kind == VerificationKind.Viewed ? "record viewed" : item.Entry.FileMatched == true ? "file matched" : "file did not match")
+                                    @if (item.Entry.DeclaredVerifier is not null)
+                                    {
+                                        <span>· by @item.Entry.DeclaredVerifier</span>
+                                    }
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                }
+            </div>
+        </div>
+    </div>
+</div>

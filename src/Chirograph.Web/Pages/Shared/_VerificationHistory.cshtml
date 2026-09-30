@@ -1,0 +1,34 @@
+@model IReadOnlyList<Chirograph.Application.Documents.VerificationEntry>
+
+@if (Model.Count == 0)
+{
+    <p class="text-muted mb-0">No one has checked this document yet.</p>
+}
+else
+{
+    <ul class="list-unstyled mb-0 verification-history">
+        @foreach (var entry in Model)
+        {
+            <li class="mb-3">
+                <div class="fw-semibold">
+                    @if (entry.Kind == VerificationKind.Viewed)
+                    {
+                        <span>Record viewed</span>
+                    }
+                    else if (entry.FileMatched == true)
+                    {
+                        <span class="text-success">File checked: exact match</span>
+                    }
+                    else
+                    {
+                        <span class="text-danger">File checked: did not match</span>
+                    }
+                </div>
+                <div class="small text-muted">
+                    @Display.DateTime(entry.OccurredAt) · shown as @(entry.StatusShown == DocumentStatus.Revoked ? "revoked" : "valid")
+                    · @(entry.DeclaredVerifier is null ? "verifier did not say who they were" : $"verifier: {entry.DeclaredVerifier} (self-declared)")
+                </div>
+            </li>
+        }
+    </ul>
+}

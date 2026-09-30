@@ -1,0 +1,86 @@
+@page "/org/documents/{id:guid}"
+@model DetailsModel
+@{
+    var document = Model.Document;
+    ViewData["Title"] = $"{Display.Type(document.Type)} · {document.EmployeeName}";
+}
+
+<nav aria-label="breadcrumb"><ol class="breadcrumb small"><li class="breadcrumb-item"><a asp-page="/Org/Index">Dashboard</a></li><li class="breadcrumb-item active" aria-current="page">Document</li></ol></nav>
+
+@if (TempData["Message"] is string message)
+{
+    <div class="alert alert-success" role="status">@message</div>
+}
+<div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
+    <div>
+        <h1 class="h3 mb-1">@document.EmployeeName</h1>
+        <div class="text-muted">@Display.Type(document.Type) · @document.Designation</div>
+    </div>
+    @if (document.Status == DocumentStatus.Revoked)
+    {
+        <span class="badge text-bg-danger fs-6">Revoked on @Display.Date(document.RevokedAt!.Value)</span>
+    }
+    else
+    {
+        <span class="badge text-bg-success fs-6">Valid</span>
+    }
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h2 class="card-title">Verification link</h2>
+                <div class="copy-row mb-3">
+                    <code id="verification-url">@document.VerificationUrl</code>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-copy="@document.VerificationUrl">Copy</button>
+                </div>
+                <dl class="row detail-list mb-0">
+                    <dt class="col-sm-4">Verification ID</dt><dd class="col-sm-8 font-monospace">@document.VerificationId.ToDisplayString()</dd>
+                    <dt class="col-sm-4">Employee email</dt><dd class="col-sm-8">@document.EmployeeEmail</dd>
+                    <dt class="col-sm-4">Employment</dt><dd class="col-sm-8">@Display.Period(document.EmploymentStart, document.EmploymentEnd)</dd>
+                    <dt class="col-sm-4">Issued</dt><dd class="col-sm-8">@Display.DateTime(document.IssuedAt)@(document.IssuedBy is null ? "" : $" by {document.IssuedBy}")</dd>
+                    <dt class="col-sm-4">File</dt><dd class="col-sm-8">@Display.FileSize(document.FileSizeBytes) · SHA-256 <span class="fingerprint">@document.Fingerprint</span></dd>
+                    @if (document.Status == DocumentStatus.Revoked)
+                    {
+                        <dt class="col-sm-4">Revoked</dt>
+                        <dd class="col-sm-8">@Display.DateTime(document.RevokedAt!.Value)@(document.RevokedBy is null ? "" : $" by {document.RevokedBy}")<br /><span class="text-muted">Reason: @document.RevocationReason</span></dd>
+                    }
+                </dl>
+                <div class="d-flex flex-wrap gap-2 mt-3">
+                    <a class="btn btn-outline-primary" asp-page-handler="Download" asp-route-id="@document.Id" id="download-link">Download stamped PDF</a>
+                    <form method="post" asp-page-handler="Resend" asp-route-id="@document.Id" id="resend-form">
+                        <button type="submit" class="btn btn-outline-secondary">Email it to the employee again</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        @if (document.Status == DocumentStatus.Valid)
+        {
+            <div class="card border-danger-subtle">
+                <div class="card-body">
+                    <h2 class="card-title">Revoke this document</h2>
+                    <p class="text-muted small">Verifiers will see it as revoked, with the date. The reason is shown only to your
+                        organization and to the employee, who is notified by email. This can't be undone.</p>
+                    <form method="post" asp-page-handler="Revoke" asp-route-id="@document.Id" id="revoke-form">
+                        <label asp-for="Reason" class="form-label"></label>
+                        <textarea asp-for="Reason" class="form-control mb-2" rows="2" maxlength="500"></textarea>
+                        <button type="submit" class="btn btn-danger">Revoke document</button>
+                    </form>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="col-lg-5">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title">Verification history</h2>
+                <partial name="_VerificationHistory" model="document.Verifications" />
+            </div>
+        </div>
+    </div>
+</div>

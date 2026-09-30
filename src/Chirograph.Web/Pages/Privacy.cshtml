@@ -1,8 +1,49 @@
-﻿@page
+@page
 @model PrivacyModel
 @{
-    ViewData["Title"] = "Privacy Policy";
+    ViewData["Title"] = "Privacy and your data";
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's privacy policy.</p>
+<div class="col-lg-9">
+    <h1 class="h3 mb-3">Privacy and your data</h1>
+    <p class="lead text-muted">
+        Chirograph exists for one purpose: letting anyone confirm that an employment letter is genuine, unaltered and
+        still valid. It is designed around data minimisation and transparency, in line with India's Digital Personal
+        Data Protection Act, 2023.
+    </p>
+
+    <h2 class="h5 mt-4">What we keep</h2>
+    <ul>
+        <li><strong>About employees:</strong> name, email address, role or designation, employment start and end dates,
+            the type of letter, when it was issued, and a SHA-256 fingerprint of the stamped PDF. The stamped PDF itself
+            is kept so the employee and the issuer can download it again. The unstamped upload is not kept.</li>
+        <li><strong>About HR users:</strong> their work email address and role. No names, phone numbers or passwords.</li>
+        <li><strong>About verifications:</strong> when a check happened, whether a file was compared and the result,
+            and an organization name if the verifier chose to give one. We do not store IP addresses or device details.
+            Files uploaded for checking are hashed in memory and never stored.</li>
+    </ul>
+
+    <h2 class="h5 mt-4">Who sees what</h2>
+    <ul>
+        <li><strong>Anyone with a letter's link or QR code</strong> sees the issuer, its verified domain, the letter type,
+            the employee's name, role, employment dates, the issue date and whether the letter was revoked (with the
+            date). Not the employee's email address, and not the reason for a revocation. These pages are hidden from
+            search engines.</li>
+        <li><strong>The issuing organization</strong> sees its own letters and every verification of them.</li>
+        <li><strong>The employee</strong> sees all letters issued to their email address, from any employer, with every
+            verification and any revocation reason, at <a asp-page="/Me/Index">My documents</a>.</li>
+    </ul>
+
+    <h2 class="h5 mt-4">Your rights</h2>
+    <p>
+        You can see your data and its verification history at any time. For corrections or erasure of a letter's
+        details, contact the organization that issued it: it decides what the letter says, and can revoke it. Chirograph
+        acts on the issuing organization's behalf in holding these records.
+    </p>
+
+    <h2 class="h5 mt-4">Emails</h2>
+    <p>
+        We email only to deliver sign-in links, invitations, domain confirmations, issued letters and revocation notices.
+        Every link works once and expires.
+    </p>
+</div>

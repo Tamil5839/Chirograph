@@ -1,16 +1,22 @@
-using Microsoft.AspNetCore.Mvc.Testing;
+using Chirograph.IntegrationTests.Support;
 
 namespace Chirograph.IntegrationTests;
 
-public class SmokeTests(WebApplicationFactory<Program> factory) : IClassFixture<WebApplicationFactory<Program>>
+public sealed class SmokeTests(ChirographWebFactory factory) : IClassFixture<ChirographWebFactory>
 {
-    [Fact]
-    public async Task Home_page_responds()
+    [Theory]
+    [InlineData("/")]
+    [InlineData("/v")]
+    [InlineData("/signup")]
+    [InlineData("/auth/signin")]
+    [InlineData("/me")]
+    [InlineData("/privacy")]
+    public async Task Public_pages_respond(string path)
     {
-        using var client = factory.CreateClient();
+        using var browser = factory.CreateBrowser();
 
-        using var response = await client.GetAsync("/", TestContext.Current.CancellationToken);
+        var page = await browser.GetAsync(path);
 
-        response.EnsureSuccessStatusCode();
+        page.Response.EnsureSuccessStatusCode();
     }
 }

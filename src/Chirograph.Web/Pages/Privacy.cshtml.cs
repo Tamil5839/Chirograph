@@ -1,12 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Chirograph.Web.Security;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Chirograph.Web.Pages;
 
-public class PrivacyModel : PageModel
+[Indexable]
+public sealed class PrivacyModel : PageModel
 {
     public void OnGet()
     {
     }
 }
-

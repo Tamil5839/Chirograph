@@ -1,0 +1,72 @@
+@page "/me"
+@model IndexModel
+@{
+    ViewData["Title"] = "My documents";
+}
+
+@if (Model.Documents is { } documents)
+{
+    <h1 class="h3 mb-1">My documents</h1>
+    <p class="text-muted">Letters issued to <strong>@User.Identity?.Name</strong>, and a record of every time someone checked them.</p>
+    @if (documents.Count == 0)
+    {
+        <p class="text-muted">No documents have been issued to this address.</p>
+    }
+    else
+    {
+        <div class="list-group">
+            @foreach (var document in documents)
+            {
+                <a class="list-group-item list-group-item-action py-3" asp-page="/Me/Document" asp-route-id="@document.Id">
+                    <div class="d-flex justify-content-between flex-wrap gap-2">
+                        <div>
+                            <div class="fw-semibold">@Display.Type(document.Type) · @document.IssuerName</div>
+                            <div class="small text-muted">@document.Designation · issued @Display.Date(document.IssuedAt) · <span class="font-monospace">@document.IssuerDomain</span></div>
+                        </div>
+                        <div class="text-end">
+                            @if (document.Status == DocumentStatus.Revoked)
+                            {
+                                <span class="badge text-bg-danger status-pill">Revoked</span>
+                            }
+                            else
+                            {
+                                <span class="badge text-bg-success status-pill">Valid</span>
+                            }
+                            <div class="small text-muted mt-1">checked @document.VerificationCount time@(document.VerificationCount == 1 ? "" : "s")</div>
+                        </div>
+                    </div>
+                </a>
+            }
+        </div>
+    }
+}
+else
+{
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <h1 class="h3 mb-2">My documents</h1>
+            @if (Model.Sent)
+            {
+                <div class="alert alert-success" role="status">If any documents were issued to <strong>@Model.Email</strong>, a
+                    sign-in link is on its way. It works once and expires in 20 minutes.</div>
+            }
+            else
+            {
+                <p class="text-muted">See the employment letters issued to you through Chirograph, and exactly when each one was
+                    verified. Enter the email address your employer sent your letter to.</p>
+                <form method="post" id="employee-signin-form" class="card card-body">
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label"></label>
+                        <input asp-for="Email" class="form-control" autocomplete="email" />
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Email me a link</button>
+                </form>
+            }
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

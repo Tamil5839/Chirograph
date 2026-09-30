@@ -1,0 +1,98 @@
+@page "/org/documents/issue"
+@model IssueModel
+@inject IWebHostEnvironment Environment
+@{
+    ViewData["Title"] = "Issue a document";
+}
+
+<div class="row">
+    <div class="col-lg-8">
+        <h1 class="h3 mb-2">Issue a document</h1>
+        <p class="text-muted">
+            Upload the signed letter as a PDF and record its key details. Chirograph adds a verification stamp (QR code,
+            verification ID and link) to every page, records a fingerprint of the stamped file, and emails it to the
+            employee. Verifiers will see these details, so make sure they match the letter.
+        </p>
+
+        @if (!User.OrganizationIsVerified())
+        {
+            <div class="alert alert-warning">Verify your organization's domain before issuing. <a asp-page="/Org/Domain" class="alert-link">Verify now</a>.</div>
+        }
+
+        <form method="post" enctype="multipart/form-data" id="issue-form" class="card card-body">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+            <div class="mb-3">
+                <label asp-for="Input.Pdf" class="form-label"></label>
+                <input asp-for="Input.Pdf" type="file" accept="application/pdf,.pdf" class="form-control" />
+                <div class="form-text">Up to 10 MB. Not password-protected or digitally signed.
+                    @if (Environment.IsDevelopment())
+                    {
+                        <span>Need one for testing? <a href="/dev/sample-letter.pdf">Download a sample letter</a>.</span>
+                    }
+                </div>
+                <span asp-validation-for="Input.Pdf" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Input.Type" class="form-label"></label>
+                <select asp-for="Input.Type" class="form-select">
+                    <option value="">Choose…</option>
+                    <option value="@DocumentType.ExperienceLetter">@Display.Type(DocumentType.ExperienceLetter)</option>
+                    <option value="@DocumentType.RelievingLetter">@Display.Type(DocumentType.RelievingLetter)</option>
+                </select>
+                <span asp-validation-for="Input.Type" class="text-danger small"></span>
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label asp-for="Input.EmployeeName" class="form-label"></label>
+                    <input asp-for="Input.EmployeeName" class="form-control" autocomplete="off" />
+                    <span asp-validation-for="Input.EmployeeName" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Input.Designation" class="form-label"></label>
+                    <input asp-for="Input.Designation" class="form-control" autocomplete="off" />
+                    <span asp-validation-for="Input.Designation" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Input.EmployeeEmail" class="form-label"></label>
+                <input asp-for="Input.EmployeeEmail" class="form-control" autocomplete="off" />
+                <div class="form-text">Prefer a personal address: a work mailbox usually closes when someone leaves. The letter
+                    and a link to their verification history are sent here. It is never shown to verifiers.</div>
+                <span asp-validation-for="Input.EmployeeEmail" class="text-danger small"></span>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label asp-for="Input.EmploymentStart" class="form-label"></label>
+                    <input asp-for="Input.EmploymentStart" type="date" class="form-control" />
+                    <span asp-validation-for="Input.EmploymentStart" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Input.EmploymentEnd" class="form-label"></label>
+                    <input asp-for="Input.EmploymentEnd" type="date" class="form-control" />
+                    <span asp-validation-for="Input.EmploymentEnd" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" disabled="@(!User.OrganizationIsVerified())">Stamp and issue</button>
+        </form>
+    </div>
+    <div class="col-lg-4 mt-4 mt-lg-0">
+        <div class="card card-body small">
+            <h2 class="card-title">What happens next</h2>
+            <ol class="steps mb-0">
+                <li>A QR code and verification ID are added at the bottom right of every page.</li>
+                <li>We record the SHA-256 fingerprint of the stamped file. Any later change to the file, even one byte, fails verification.</li>
+                <li>The stamped PDF is emailed to the employee, and you can download it too.</li>
+            </ol>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

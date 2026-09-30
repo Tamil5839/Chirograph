@@ -1,0 +1,59 @@
+@page "/me/documents/{id:guid}"
+@model DocumentModel
+@{
+    var document = Model.Document;
+    ViewData["Title"] = Display.Type(document.Type);
+}
+
+<nav aria-label="breadcrumb"><ol class="breadcrumb small"><li class="breadcrumb-item"><a asp-page="/Me/Index">My documents</a></li><li class="breadcrumb-item active" aria-current="page">@Display.Type(document.Type)</li></ol></nav>
+
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
+    <div>
+        <h1 class="h3 mb-1">@Display.Type(document.Type) from @document.IssuerName</h1>
+        <div class="text-muted"><span class="font-monospace">@document.IssuerDomain</span> · issued @Display.Date(document.IssuedAt)</div>
+    </div>
+    @if (document.Status == DocumentStatus.Revoked)
+    {
+        <span class="badge text-bg-danger fs-6">Revoked on @Display.Date(document.RevokedAt!.Value)</span>
+    }
+    else
+    {
+        <span class="badge text-bg-success fs-6">Valid</span>
+    }
+</div>
+
+@if (document.Status == DocumentStatus.Revoked)
+{
+    <div class="alert alert-danger" role="alert">
+        @document.IssuerName revoked this document on @Display.Date(document.RevokedAt!.Value). Reason given:
+        <strong id="revocation-reason">@document.RevocationReason</strong>. Verifiers see only that it was revoked and when,
+        not the reason. If you think this is a mistake, contact @document.IssuerName.
+    </div>
+}
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title">What verifiers see</h2>
+                <dl class="row detail-list">
+                    <dt class="col-sm-5">Name</dt><dd class="col-sm-7">@document.EmployeeName</dd>
+                    <dt class="col-sm-5">Role</dt><dd class="col-sm-7">@document.Designation</dd>
+                    <dt class="col-sm-5">Employment</dt><dd class="col-sm-7">@Display.Period(document.EmploymentStart, document.EmploymentEnd)</dd>
+                    <dt class="col-sm-5">Verification link</dt><dd class="col-sm-7"><a href="@document.VerificationUrl">@document.VerificationId.ToDisplayString()</a></dd>
+                </dl>
+                <a class="btn btn-outline-primary" asp-page-handler="Download" asp-route-id="@document.Id">Download your letter (PDF)</a>
+                <p class="small text-muted mt-3 mb-0">Share this exact file. Editing, re-saving or converting it changes the file,
+                    and the exact-file check will fail.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title">Who checked it</h2>
+                <partial name="_VerificationHistory" model="document.Verifications" />
+            </div>
+        </div>
+    </div>
+</div>
